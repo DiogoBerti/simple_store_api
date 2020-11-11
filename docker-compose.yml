@@ -1,0 +1,35 @@
+version: '3'
+services:
+  db_store:
+    image: postgres
+    environment:
+      POSTGRES_DB: store_main
+      POSTGRES_USER: store_main
+      POSTGRES_PASSWORD: testingdb
+    networks:
+      - store-net
+
+  store:
+    build: .
+    restart: always
+    image: diogoberti88/app-image    
+    environment:            
+      DB_NAME: store_main
+      DB_USER: store_main
+      DB_PWD: testingdb
+      DB_HOST: db_store      
+    command: ["sh", "entrypoint.sh"]
+    depends_on:
+      - db_store      
+    volumes:
+      - .:/code
+    ports:
+      - "8000:8000"
+    links:
+      - db_store
+    networks:
+      - store-net
+
+networks:
+  store-net:
+    driver: bridge
