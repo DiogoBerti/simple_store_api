@@ -30,6 +30,9 @@ class Client(models.Model):
         max_length=1,
     )
 
+    class Meta:
+        ordering = ['id']
+
 class Product(models.Model):
     name = models.CharField("Produto", max_length=64)
     price = models.FloatField("Price")
@@ -41,6 +44,9 @@ class Product(models.Model):
         max_length=1,
     )
 
+    class Meta:
+        ordering = ['id']
+
 class SaleOrder(models.Model):
     client = models.ForeignKey("Client", verbose_name="Client", on_delete=models.SET_NULL, blank=True, null=True)
     date_order = models.DateField("Order Date", auto_now_add=True)
@@ -51,6 +57,9 @@ class SaleOrder(models.Model):
         default="1",
         max_length=1,
     )
+
+    class Meta:
+        ordering = ['id']
 
     @property
     def lines(self):
@@ -79,6 +88,9 @@ class SaleOrderLine(models.Model):
     quantity = models.FloatField("Quantity", default=1)
     discount = models.FloatField("Discount", default=0.0)
     total_value = models.FloatField("Total Value", blank=True, null=True)
+    
+    class Meta:
+        ordering = ['id']
 
     @property
     def calculated_total(self):

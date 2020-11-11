@@ -1,6 +1,7 @@
 Django<3.0
 djangorestframework
 djangorestframework-datatables
-djangorestframework-jwt
+djangorestframework-simplejwt
 drf_yasg
 psycopg2
+whitenoise

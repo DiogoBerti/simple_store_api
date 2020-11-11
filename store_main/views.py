@@ -16,7 +16,6 @@ class ClientViewSet(
     """
 
     queryset = Client.objects.all()
-    permission_classes = [AllowAny]
     serializer_class = ClientSerializer
 
 class ProductViewSet(
@@ -32,7 +31,6 @@ class ProductViewSet(
     """
 
     queryset = Product.objects.all()
-    permission_classes = [AllowAny]
     serializer_class = ProductSerializer
 
 class SaleOrderViewSet(
@@ -48,7 +46,6 @@ class SaleOrderViewSet(
     """
 
     queryset = SaleOrder.objects.all()
-    permission_classes = [AllowAny]
     serializer_class = SaleOrderSerializer
 
 class SaleOrderLineViewSet(
@@ -64,5 +61,4 @@ class SaleOrderLineViewSet(
     """
 
     queryset = SaleOrderLine.objects.all()
-    permission_classes = [AllowAny]
     serializer_class = SaleOrderLineSerializer
