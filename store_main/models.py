@@ -32,6 +32,14 @@ class Client(models.Model):
 
     class Meta:
         ordering = ['id']
+    
+    @property
+    def get_sales(self):
+        return SaleOrder.objects.filter(client=self)
+    
+    @property
+    def get_sales_spent(self):
+        return sum([order.total_value_order for order in SaleOrder.objects.filter(client=self)])
 
 class Product(models.Model):
     name = models.CharField("Produto", max_length=64)
@@ -79,9 +87,7 @@ class SaleOrder(models.Model):
         else:
             lines = SaleOrderLine.objects.filter(order=self.id)
             return sum([line.calculated_total for line in lines])
-
-
-
+            
 class SaleOrderLine(models.Model):
     order = models.ForeignKey("SaleOrder", verbose_name="Order", on_delete=models.CASCADE, blank=True, null=True)
     product = models.ForeignKey("Product", verbose_name="Product", on_delete=models.SET_NULL, blank=True, null=True)

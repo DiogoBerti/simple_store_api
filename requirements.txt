@@ -3,5 +3,7 @@ djangorestframework
 djangorestframework-datatables
 djangorestframework-simplejwt
 drf_yasg
+pytest==5.3.2
+pytest-django==3.7.0
 psycopg2
 whitenoise
