@@ -1,5 +1,5 @@
 from rest_framework import viewsets, mixins, views
-from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.permissions import IsAuthenticated
 from .models import Client, Product, SaleOrder, SaleOrderLine
 from .serializers import ClientSerializer, ProductSerializer, SaleOrderSerializer, SaleOrderLineSerializer
 
@@ -14,9 +14,8 @@ class ClientViewSet(
     """
         ViewSet to manipulate and retrieve data from the Client model
     """
-
     queryset = Client.objects.all()
-    serializer_class = ClientSerializer
+    serializer_class = ClientSerializer    
 
 class ProductViewSet(
     mixins.CreateModelMixin,
@@ -28,8 +27,7 @@ class ProductViewSet(
 ):
     """
         ViewSet to manipulate and retrieve data from the Product model
-    """
-
+    """    
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
 

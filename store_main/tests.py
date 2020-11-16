@@ -1,14 +1,31 @@
 import pytest
 from . import models
-from rest_framework.test import APIRequestFactory
+from rest_framework.test import APIClient
+from django.test import RequestFactory
+from django.contrib.auth.models import User
 import os
 import re
 
 # SETUP
 @pytest.fixture
 def api_client():   
-   return APIRequestFactory()
+   return APIClient()
 
+
+@pytest.fixture
+def object_user():
+    return User.objects.create(**{
+        "password": "pbkdf2_sha256$150000$QSJcNYRxX3oO$nfLSNlx87nyv+XpQLH/soBu8j5FipwWHJuanmjkO7EI=",
+        "last_login": None,
+        "is_superuser": True,
+        "username": "root",
+        "first_name": "",
+        "last_name": "",
+        "email": "",
+        "is_staff": True,
+        "is_active": True,
+        "date_joined": "2020-11-11T20:15:30.547Z",   
+    })
 
 @pytest.fixture
 def object_client():
@@ -113,8 +130,102 @@ class TestAPIs:
     """
         Testing Apis...
     """
-    def test_client_api(self, api_client):
-        posted = api_client.post("/api/v1/clients", {'name': 'Testing User'})        
-        assert posted, "Post data did not work"
-        assert posted.status_code in [200,201], "Post data Rejected"
+    def test_client_api(self, api_client, object_user):
+        '''
+            Setting API the API user and doing some requests...
+        '''
+        # Login URL
+        create_login = api_client.post("/api/token/", {
+            "username":"root",
+            "password":"admin"
+        })        
+        assert "access" in create_login.data.keys(), "Could not Authenticate User"
+        
+        # Trying to Get Without Autth
+        gettting = api_client.get("/api/v1/clients/")
+        assert gettting.status_code not in [200,201], "Get data Should not Work"
+        # Loggin In User
+        api_client.login(username='root', password='admin')
+        # Tryiing to Get Authenticated
+        gettting_logged = api_client.get("/api/v1/clients/")
+        assert gettting_logged.status_code in [200,201], "Get was Rejected"
+        
+    def test_product_api(self, api_client, object_user):
+        '''
+            Testing the products API
+        '''                      
+        # Trying to Get Without Auth
+        gettting = api_client.get("/api/v1/products/")
+        assert gettting.status_code not in [200,201], "Get data Should not Work"
+        # Loggin In User
+        api_client.login(username='root', password='admin')
+        # GET
+        gettting_logged = api_client.get("/api/v1/products/")
+        assert gettting_logged.status_code in [200,201], "Get on Products was Rejected"
+        # POST
+        posting_product = api_client.post("/api/v1/products/", {
+            "name":"Testing Product",
+            "price":10,
+            "weight":1,
+            "type_product":"1",   
+        })
+        assert posting_product.status_code in [200,201], "Post on Products was Rejected"
+        assert models.Product.objects.all().count() == 1, "Product was not Created.."
+        # PATCH
+        prod_id = models.Product.objects.first()
+        api_client.patch("/api/v1/products/{}/".format(prod_id.id), {
+            "name":"New Product",
+        })
+        assert models.Product.objects.all().count() == 1, "Product was Deleted Wrongly.."
+        assert models.Product.objects.first().name == "New Product", "Product Patch did not work."
+        # DELETE
+        api_client.delete("/api/v1/products/{}/".format(prod_id.id))
+        assert models.Product.objects.all().count() < 1, "Product was not Deleted.."
+        
+    def test_saleorder_api(self, api_client, object_user, object_client, object_product):
+        '''
+            Testing the Sales API
+        '''                      
+        # Trying to Get Without Auth
+        gettting = api_client.get("/api/v1/order/")
+        assert gettting.status_code not in [200,201], "Get data Should not Work"
+        # Loggin In User
+        api_client.login(username='root', password='admin')
+        # GET
+        gettting_logged = api_client.get("/api/v1/order/")
+        assert gettting_logged.status_code in [200,201], "Get on order was Rejected"
+        # POST
+        order_data =  {
+            "client": object_client.id,
+            "type_of_payment": "1",                   
+        }        
+        posting_order = api_client.post("/api/v1/order/",order_data)        
+        assert posting_order.status_code in [200,201], "Post on order was Rejected"
+        assert models.SaleOrder.objects.all().count() == 1, "Sale Order was not Created.."
+        del order_data
+        # PATCH
+        order_id = models.SaleOrder.objects.first()
+        api_client.patch("/api/v1/order/{}/".format(order_id.id), {
+            "type_of_payment": "2",  
+        })
+        assert models.SaleOrder.objects.all().count() == 1, "Order was Deleted Wrongly.."
+        assert models.SaleOrder.objects.first().type_of_payment == "2", "Order Patch did not work."
+        
+        # ORDER LINE Testing...
+        posting_order_line = api_client.post("/api/v1/order_lines/",{
+            "order":order_id.id,
+            "product": object_product.id,
+            "quantity": 1
+        })        
+        assert posting_order_line.status_code in [200,201], "Post on order Line was Rejected"
+        assert models.SaleOrderLine.objects.all().count() == 1, "Order Line was not Created.."    
+        del order_id
+        # Checking order line inside order
+        order_id = models.SaleOrder.objects.first()
+        assert order_id.lines, "Lines were not uploaded to Order"
+        assert len(order_id.lines) == 1, "Lines Were not added correctly to order"
+        # DELETE
+        api_client.delete("/api/v1/order/{}/".format(order_id.id))
+        assert models.SaleOrder.objects.all().count() < 1, "Product was not Deleted.."
+
         

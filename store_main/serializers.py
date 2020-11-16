@@ -31,7 +31,7 @@ class SaleOrderSerializer(serializers.ModelSerializer):
     """
         Serializer for SaleOrder
     """
-    lines = SaleOrderLineSerializer(many=True, write_only=True)
+    lines = SaleOrderLineSerializer(many=True, write_only=True, required=False)
     lines_from_order = serializers.SerializerMethodField('get_lines', read_only=True)    
     total_value = serializers.SerializerMethodField('get_total_value', read_only=True)    
 
@@ -46,11 +46,15 @@ class SaleOrderSerializer(serializers.ModelSerializer):
             Receiving the data from lines and Orders and generate the respective
             registers.
         '''
-        lines_to_update = validated_data.pop('lines')        
-        instance = models.SaleOrder.objects.create(**validated_data)
-        for line in lines_to_update:            
-            models.SaleOrderLine.objects.create(order=instance, **line)        
-        return instance
+        try:
+            lines_to_update = validated_data.pop('lines')        
+            instance = models.SaleOrder.objects.create(**validated_data)
+            for line in lines_to_update:            
+                models.SaleOrderLine.objects.create(order=instance, **line)        
+            return instance
+        except:
+            instance = models.SaleOrder.objects.create(**validated_data)
+            return instance
 
     class Meta:
         model = models.SaleOrder
