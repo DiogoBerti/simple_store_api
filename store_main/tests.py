@@ -82,20 +82,31 @@ def object_sale_line(object_sale_order, object_product):
 
 # Testing Objects..
 @pytest.mark.django_db
-class TestClientProductCompany:
+class TestClientProduct:
     """
-        Testing Clients...
+        Testing Clients And products...
     """
 
     def test_client_create(self, object_client):
+        print("\n______STARTING ALL TESTS__________")
         # Testing client creation
         assert object_client, "Client not created"
 
     def test_client_update(self, object_client):
+        print("______TESTING CLIENT CREATION__________")
         # Testing client update
-        object_client.name = "Other Name"
-        assert object_client, "Client not created"
+        object_client.name = "Other Name"        
         assert (object_client.name == "Other Name"), "Client was not renamed"
+    
+    def test_product_create(self, object_product):        
+        print("______TESTING PRODUCTS__________")
+        # Testing Product creation
+        assert object_product, "Product not created"
+
+    def test_product_update(self, object_product):
+        # Testing product update
+        object_product.name = "Caixa de Bom bom"        
+        assert (object_product.name == "Caixa de Bom bom"), "Product was not renamed"
 
 @pytest.mark.django_db
 class TestSaleOrder:
@@ -103,6 +114,7 @@ class TestSaleOrder:
         Testing Sale Orders...
     """
     def test_order_create(self, object_sale_order, object_sale_line):
+        print("______TESTING SALE ORDERS__________")
         # Testing Order creation
         assert object_sale_order, "Order not created"
         assert object_sale_line, "Order Line not created"
@@ -134,6 +146,7 @@ class TestAPIs:
         '''
             Setting API the API user and doing some requests...
         '''
+        print("______TESTING APIS__________")
         # Login URL
         create_login = api_client.post("/api/token/", {
             "username":"root",
