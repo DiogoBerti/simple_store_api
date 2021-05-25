@@ -24,7 +24,8 @@ schema_view = get_schema_view(
    openapi.Info(
       title="Store API",
       default_version='v1',
-      description="Simple Store Api",            
+      description="Simple Store Api",    
+      urlconf='store_main.urls'        
    ),
    public=True,
    permission_classes=[permissions.AllowAny],
